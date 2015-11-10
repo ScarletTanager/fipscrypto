@@ -1,12 +1,15 @@
-# fipscryptor.rb - simple Ruby encryptor using OpenSSL FIPS mode
+# fipscryptor.rb - simple Ruby encryptor which will work when using OpenSSL FIPS mode
 # Author: Sandy Cash <lhcash@us.ibm.com>
+#
+# Note: enabling OpenSSL FIPS mode is up to the user.  FIPS mode is not required
+# for this encryptor to work.
 
 require 'openssl'
 require 'base64'
 
 class Fipscryptor
 	class << self
-		ALGORITHM = 'AES-256-CFB'
+		ALGORITHM = 'AES-256-CFB'.freeze
 
 		# Generate a PKCS5 encryption key with some reasonable defaults
 		def generate_key(passphrase, salt)
@@ -59,7 +62,7 @@ class Fipscryptor
 	 	# (single byte => 4 chars when encoded)
 	 	def encrypt_and_package(cipher, plaintext, key, iv)
 	 		iv_enc = Base64.strict_encode64(iv)
-	 		Base64.strict_encode64(iv_enc.length.to_s).tap { |output| output << iv_enc << encrypt(cipher, plaintext, key, iv) }
+	 		Base64.strict_encode64(iv_enc.length.to_s).tap { |output| output << iv_enc << Base64.strict_encode64(encrypt(cipher, plaintext, key, iv)) }
 	 	end
 
 	 	def decrypt(cipher, encrypted, key, iv)
@@ -74,7 +77,7 @@ class Fipscryptor
 	 	def decode_and_decrypt(cipher, encoded, key)
 	 		iv_enc_len = Base64.decode64(encoded[0,4]).to_i
 			iv = Base64.decode64(encoded[4, iv_enc_len])
-			decrypt(cipher, encoded[4 + iv_enc_len, encoded.length - (4 + iv_enc_len)], key, iv)
+			decrypt(cipher, Base64.decode64(encoded[4 + iv_enc_len, encoded.length - (4 + iv_enc_len)]), key, iv)
 		end	 		
 	end
 end
