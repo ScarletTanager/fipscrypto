@@ -1,2 +1,2 @@
 # fipscrypto
-Examples of cryptographic usage that will pass muster for FIPS-compliant solutions
+Examples of cryptographic usage that will pass master for FIPS-compliant solutions
